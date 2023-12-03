@@ -1,6 +1,11 @@
 version: '3.8'
 services:
   webserver:
-    image: kwangko/oauth:v1.0
+    build:
+          context: .
+          dockerfile: Dockerfile  # Specify the Dockerfile name if it's not named 'Dockerfile'
     ports:
       - "9090:9090"
+    volumes:
+      - ./app:/app
+    restart: always
