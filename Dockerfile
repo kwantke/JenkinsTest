@@ -1,26 +1,36 @@
 FROM gradle:jdk17-alpine as builder
 WORKDIR /build
 
-# 그래들 파일이 변경되었을 때만 새롭게 의존패키지 다운로드 받게함.
 COPY build.gradle settings.gradle /build/
-RUN gradle build -x test --parallel --continue > /dev/null 2>&1 || true
+RUN gradle build -x test --parallel > /dev/null 2>&1 || true
 
-# 빌더 이미지에서 애플리케이션 빌드
 COPY . /build
 RUN gradle build -x test --parallel
 
-# APP
-FROM openjdk:17-jdk-slim
+FROM openjdk:17-jdk-alpine
+
+# Add a non-root user and group
+#RUN addgroup -S -g 1024 kevin && \
+#    adduser -S -u 1024 -G kevin kevin
+
+RUN addgroup -S -g 1000 kevin && \
+    adduser -S -u 1000 -G kevin kevin && \
+    mkdir /app && \
+    chown -R kevin:kevin /app
+
+
 WORKDIR /app
+COPY --from=builder /build/build/libs/*-0.0.1-SNAPSHOT.jar /app/app.jar
 
-# 빌더 이미지에서 jar 파일만 복사
-# COPY --from=builder /build/build/libs/*-SNAPSHOT.jar ./app.jar
-COPY --from=builder /build/build/libs/jenkinsTest-0.0.1-SNAPSHOT.jar .
+#RUN chmod +x /app/api-0.0.1-SNAPSHOT.jar
 
-EXPOSE 9090
+#RUN ls -l /app
 
-# root 대신 nobody 권한으로 실행
-ENTRYPOINT ["java","-jar","jenkinsTest-0.0.1-SNAPSHOT.jar"]
-#ENTRYPOINT [   "java",   "-jar",   "-Djava.security.egd=file:/dev/./urandom",   "-Dsun.net.inetaddr.ttl=0",   "oauth-0.0.1-SNAPSHOT.jar"]
+#RUN chown -R kevin:kevin /app
+
+USER kevin
 
 
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
