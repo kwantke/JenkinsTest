@@ -19,7 +19,7 @@ RUN addgroup -S -g 1000 kevin && \
     chown -R kevin:kevin /app
 
 WORKDIR /app
-COPY --from=builder /build/build/libs/*-0.0.1-SNAPSHOT.jar /app/app.jar
+COPY --from=builder /build/build/libs/*-0.0.1-SNAPSHOT.jar /app/
 
 #RUN chmod +x /app/api-0.0.1-SNAPSHOT.jar
 
@@ -32,4 +32,4 @@ USER kevin
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/*.jar"]
