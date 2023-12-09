@@ -9,6 +9,6 @@ public class TestController {
 
   @GetMapping("/")
   public String home(){
-    return "home3";
+    return "home4";
   }
 }
